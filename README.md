@@ -1,55 +1,81 @@
 # **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+## Writeup Template
 
-Overview
----
+### You can use this file as a template for your writeup if you want to submit it as a markdown file. But feel free to use some other method and submit a pdf if you prefer.
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+### Running Instructions:
+`P1.ipynb` contains the full workflow.
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+**Finding Lane Lines on the Road**
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
-
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
 
-The Project
----
+### Reflection
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+#### Architecture Pipeline:
 
-**Step 2:** Open the code in a Jupyter Notebook
+1. Read the image.
+2. Convert image to grayscale
+3. Apply Gaussian Blur with Kernel
+4. Apply Canny function to detect edges by identifying hifh change in gradient.
+5. Mask edges using region of interest.(Experiment Space to work on)
+6. Apply Hough Transform on the masked edges.
+7. Extrapolate disjoint line segments within draw_line() to gain a single line segment (1 each for both sides of the lane).
+8. Combine the new line with the original image to find the accuracy.
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
+##### NOTE: I have commented the plt.imshow() later in the function image_lane_lines after running it over the test images for a clean notebook. (Video output would have created undesired outputs)
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+#### draw_line() explanation:
+##### Initial Iteration
+1. In the beginning, I replicated the demo lecture quiz code into this pipeline to obtain the following image.
+2. Following this step, I tried joining the lines using the following steps:
 
-`> jupyter notebook`
+Approach 1:
+1. First, found out the line equation, slope and intercept. 
+2. Found out the score for line based on points given (Score here is the distance of point from line)
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+Approach 2a:
+1. Found the slope and intercept for all given points.
+2. Took mean of slope and intercept. (Optional video sometimes gives only one point for some frames, so filter created)
+3. Found the intersection point between the 2 lines using slope and intercept.
+4. Directly plotted the line using the formula mentionaed alongside the code.
+5. These result was good but it gave me a triangle shape rather than two separate lines.
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Approach 2b:
+1. Follow Steps 1-3 from Approach 2a.
+2. After doing some reading online, I found that the best way to separate 2 line segments is to mention threshold for both.
+3. Running multiple iterations on the region of interest and points I found 0.97 to satisfy the bottom as it is close to the axis and 0.61 to satisfy the top as it is near mid of the image. Another reason for this step is to prevent the lines from jumping between the video.
+4. Thus, using an ensemble to the Approach 2a slope, intercept and the new points, plotted the new extended line segments.
+5. All these new customizations were to satisfy the Optional Video.
+
+
+#### Architecture Challenges:
+1. Finding the coordinates for the perfect region of interest took multiple iterations.
+2. Had to change the region of interest from hard-coded values to image size as the videos are of different sizes.
+3. Had to switch from Approach 1 to 2 due to complications and efficiency issues with the Optional Video for Approach 1.
+4. Had to set threshold (deviation < mean.std) for slope as all values caused it create fluctuating lines in the videos.
+5. The Optional video enabled me to create a null filter for slope as it occurs for some frames.
+6. Finding the perfect range for the line segments took most of my time to satisfy the Optional Video.
+
+
+### 2. Identify potential shortcomings with your current pipeline
+
+
+#### Shortcomings:
+1. The lines in the Optional Video are still not perfectly arranged and gets problematic during the tree shadow.
+2. This approach won't work if the camera angle is kept other than the fron or back of the car as region of interest has been placed in reference to the center bottom of the image.
+
+
+### 3. Suggest possible improvements to your pipeline
+
+#### Improvements:
+1. Using gradient to identify the lines much better.
+2. Enhancing the image to increase the contrast difference which will help increasing the efficiency of line identification.
+3. Using learning algorithm to auto-identify the correct slope, intercept instead of using hard-coded slopd intercept thresholds.
