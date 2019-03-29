@@ -9,6 +9,11 @@ The goals / steps of this project are the following:
 * Make a pipeline that finds lane lines on the road
 * Reflect on your work in a written report
 
+### Output videos:
+`test_videos_output` folder
+1. solidWhiteRight.mp4
+2. solidYellowLeft.mp4
+3. challenge.mp4
 
 ### Reflection
 
@@ -75,3 +80,6 @@ Approach 2b:
 1. Using gradient to identify the lines much better.
 2. Enhancing the image to increase the contrast difference which will help increasing the efficiency of line identification.
 3. Using learning algorithm to auto-identify the correct slope, intercept instead of using hard-coded slopd intercept thresholds.
+
+## LICENSE:
+This project has been open-sourced basedon on MIT License. All Developers are free to use my code or make pull requests without any issue.
